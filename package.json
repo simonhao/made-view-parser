@@ -1,0 +1,28 @@
+{
+  "name": "made-view-parser",
+  "version": "0.1.0",
+  "description": "made view parser",
+  "main": "./lib/parser.js",
+  "directories": {
+    "doc": "doc",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "node ./test/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/simonhao/made-view-parser.git"
+  },
+  "keywords": [
+    "view",
+    "html",
+    "parser"
+  ],
+  "author": "simonhao",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/simonhao/made-view-parser/issues"
+  },
+  "homepage": "https://github.com/simonhao/made-view-parser#readme"
+}

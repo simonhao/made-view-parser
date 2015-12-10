@@ -1,0 +1,17 @@
+doctype html
+html
+  head
+    meta(charset="utf-8")
+    meta(name="keywords" content=keywords)
+    meta(name="description" content="#{description}")
+    title #{title}
+  body
+    header.header(id="header")
+      block header
+    main.main(id="main")
+      block main
+        p this is main default content
+    footer.footer(id="footer")
+      block main
+    script.
+      console.log('this is code test');
