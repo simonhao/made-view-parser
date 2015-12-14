@@ -48,7 +48,26 @@ in          "in"
 %%
 
 
-
+<INITIAL>{if}{whitespace}+[^\r\n\f]*
+  %{
+    yytext = yytext.substring(2).trim();
+    return 'IF';
+  %}
+<INITIAL>{elseif}{whitespace}+[^\r\n\f]*
+  %{
+    yytext = yytext.substring(7).trim();
+    return 'ELSEIF';
+  %}
+<INITIAL>{else}{whitespace}+[^\r\n\f]*
+  %{
+    yytext = yytext.substring(4).trim();
+    return 'ELSE';
+  %}
+<INITIAL>{while}{whitespace}+[^\r\n\f]*
+  %{
+    yytext = yytext.substring(5).trim();
+    return 'WHILE';
+  %}
 <INITIAL>{doctype}
   %{
     return 'DOCTYPE';

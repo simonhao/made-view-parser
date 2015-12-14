@@ -54,8 +54,48 @@ Qualified-Rule
   | Origin -> $1
   | Text -> $1
   | Comment -> $1
+  | If -> $1
+  | Else -> $1
+  | ElseIf -> $1
+  | While -> $1
   ;
 
+If
+  : IF
+    %{
+      $$ = {
+        type: 'if',
+        expr: $1
+      };
+    %}
+  ;
+
+Else
+  : ELSE
+    %{
+      $$ = {
+        type: 'else',
+      };
+    %}
+  ;
+ElseIf
+  : ELSEIF
+    %{
+      $$ = {
+        type: 'elseif',
+        expr: $1
+      };
+    %}
+  ;
+While
+  : WHILE
+    %{
+      $$ = {
+        type: 'while',
+        expr: $1
+      };
+    %}
+  ;
 Doctype
   : DOCTYPE TAG-TEXT
     %{
