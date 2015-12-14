@@ -5,6 +5,7 @@
 %x STATE-INDENT
 %x STATE-ORIGIN
 %x STATE-PROPERTY
+%x STATE-EACH
 
 digit       [0-9]
 nmstart     [_$a-zA-Z]
@@ -44,9 +45,13 @@ elseif      "else if"
 while       "while"
 each        "each"
 in          "in"
-
 %%
 
+<INITIAL>{each}{whitespace}+
+  %{
+    this.begin('STATE-EACH');
+    return 'EACH';
+  %}
 
 <INITIAL>{if}{whitespace}+[^\r\n\f]*
   %{
@@ -115,6 +120,26 @@ in          "in"
     yytext = yytext.substring(2).trim();
     return 'COMMENT';
   %}
+
+
+<STATE-EACH>","{whitespace}*{ident}{whitespace}+
+  %{
+    yytext = yytext.substring(1).trim();
+    return 'EACH-INDEX';
+  %}
+<STATE-EACH>"in"{whitespace}+[^\r\n\f]*
+  %{
+    this.popState();
+
+    yytext = yytext.substring(2).trim();
+    return 'EACH-DATA';
+  %}
+<STATE-EACH>{ident}{whitespace}*
+  %{
+    yytext = yytext.trim();
+    return 'EACH-VALUE';
+  %}
+
 
 
 <STATE-PROPERTY>{whitespace}|{newline}

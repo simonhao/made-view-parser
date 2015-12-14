@@ -58,6 +58,27 @@ Qualified-Rule
   | Else -> $1
   | ElseIf -> $1
   | While -> $1
+  | Each -> $1
+  ;
+
+Each
+  : EACH EACH-VALUE EACH-DATA
+    %{
+      $$ = {
+        type: 'each',
+        value: $2,
+        data: $3
+      };
+    %}
+  | EACH EACH-VALUE EACH-INDEX EACH-DATA
+    %{
+      $$ = {
+        type: 'each',
+        value: $2,
+        index: $3,
+        data: $4
+      };
+    %}
   ;
 
 If
