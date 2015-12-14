@@ -2,21 +2,23 @@
   global.indent_stack = global.indent_stack || [0];
 %}
 
-%x state-indent
-%x state-outdent
-%x state-property
-%x state-tag
-%x state-origin
-%x state-component
-
+%x STATE-INDENT
+%x STATE-ORIGIN
+%x STATE-PROPERTY
 
 digit       [0-9]
 nmstart     [_$a-zA-Z]
-nmchar      {nmstart}|{digit}|[-]
+nmchar      {nmstart}|{digit}
 ident       {nmstart}{nmchar}*
+name        {nmstart}({nmchar}|[-])*
 
+open-paren  "("
+close-paren ")"
+dot         "."
+hyphen      "-"
 space       " "
 tab         \t
+column      "|"
 whitespace  {space}|{tab}
 newline     \r\n|\n|\r|\f
 
@@ -34,31 +36,181 @@ include     "include"
 replace     "replace"
 block       "block"
 doctype     "doctype"
+comment     "//"
 
-property-start       "("
-property-close       ")"
-
-code-start           "-"{whitespace}+
-html-start           "|"{whitespace}+
-comment-start        "//"{whitespace}*
-dot-start            "."
+if          "if"
+else        "else"
+elseif      "else if"
+while       "while"
+each        "each"
+in          "in"
 
 %%
 
 
+
+<INITIAL>{doctype}
+  %{
+    return 'DOCTYPE';
+  %}
+<INITIAL>{ident}
+  %{
+    return 'IDENT';
+  %}
+<INITIAL>{hyphen}{whitespace}+[^\r\n\f]*
+  %{
+    yytext = yytext.substring(1).trim();
+    return 'CODE';
+  %}
+<INITIAL>{hyphen}
+  %{
+    return '-';
+  %}
+<INITIAL>{dot}{name}
+  %{
+    yytext = yytext.substring(1);
+    return 'CLASS';
+  %}
+<INITIAL>{dot}{whitespace}*{newline}
+  %{
+    this.begin('STATE-ORIGIN');
+    this.unput('\n');
+  %}
+<INITIAL>{open-paren}
+  %{
+    this.begin('STATE-PROPERTY');
+    return '(';
+  %}
+<INITIAL>{column}[^\r\n\f]*
+  %{
+    yytext = yytext.substring(1).trim();
+    return 'TEXT';
+  %}
+<INITIAL>{whitespace}+[^\r\n\f]*
+  %{
+    yytext = yytext.trim();
+    return 'TAG-TEXT';
+  %}
+<INITIAL>{comment}{whitespace}+[^\r\n\f]*
+  %{
+    yytext = yytext.substring(2).trim();
+    return 'COMMENT';
+  %}
+
+
+<STATE-PROPERTY>{whitespace}|{newline}
+  %{
+    /* ignore whitespace and newline */
+  %}
+<STATE-PROPERTY>{ident}
+  %{
+    return 'IDENT';
+  %}
+<STATE-PROPERTY>{string}
+  %{
+    yytext = yytext.substring(1, yytext.length-1);
+    return 'STRING';
+  %}
+<STATE-PROPERTY>{number}
+  %{
+    return "NUMBER";
+  %}
+<STATE-PROPERTY>{hyphen}
+  %{
+    return '-'
+  %}
+<STATE-PROPERTY>"."
+  %{
+    return ".";
+  %}
+<STATE-PROPERTY>"{"
+  %{
+    return "{";
+  %}
+<STATE-PROPERTY>"}"
+  %{
+    return "}";
+  %}
+<STATE-PROPERTY>"["
+  %{
+    return "[";
+  %}
+<STATE-PROPERTY>"]"
+  %{
+    return "]";
+  %}
+<STATE-PROPERTY>","
+  %{
+    return ",";
+  %}
+<STATE-PROPERTY>":"
+  %{
+    return ":";
+  %}
+<STATE-PROPERTY>"="
+  %{
+    return "=";
+  %}
+<STATE-PROPERTY>{true}
+  %{
+    return 'TRUE';
+  %}
+<STATE-PROPERTY>{false}
+  %{
+    return 'FALSE';
+  %}
+<STATE-PROPERTY>{null}
+  %{
+    return 'NULL';
+  %}
+<STATE-PROPERTY>{close-paren}
+  %{
+    this.popState();
+    return ')';
+  %}
+
+
+
+
+<STATE-ORIGIN>{newline}{whitespace}*{newline}
+  %{
+    /* ignore blank line */
+    this.unput('\n');
+  %}
+<STATE-ORIGIN>{newline}{whitespace}*
+  %{
+    if((yyleng-1) <= indent_stack[0]){
+      this.popState();
+
+      var unput_char = [];
+
+      while((yyleng-1) < indent_stack[0]){
+        indent_stack.shift();
+        unput_char.push('<<OUTDENT>>');
+      }
+
+      if(unput_char.length){
+        this.unput(unput_char.join(''));
+      }
+    }
+  %}
+<STATE-ORIGIN>[^\r\n\f]*
+  %{
+    return 'ORIGIN';
+  %}
+
+
+
+
 <INITIAL>{newline}
   %{
-    this.begin('state-indent');
+    this.begin('STATE-INDENT');
   %}
-<state-indent><<EOF>>
-  %{
-    return 'EOF';
-  %}
-<state-indent>{whitespace}*{newline}
+<STATE-INDENT>{whitespace}*{newline}
   %{
     /* ignore blank line */
   %}
-<state-indent>{whitespace}*
+<STATE-INDENT>{whitespace}*
   %{
     this.popState();
 
@@ -66,186 +218,32 @@ dot-start            "."
       indent_stack.unshift(yyleng);
       return 'INDENT';
     }else if(yyleng < indent_stack[0]){
+      var unput_char = [];
+
       while(yyleng < indent_stack[0]){
         indent_stack.shift();
-        this.begin('state-outdent');
+        unput_char.push('<<OUTDENT>>');
       }
+
+      this.unput(unput_char.join(''));
     }
   %}
-<state-outdent>
+<INITIAL>"<<OUTDENT>>"
   %{
-    this.popState();
     return 'OUTDENT';
   %}
+<INITIAL><<EOF>>
+  %{
+    if(indent_stack[0] > 0){
+      var unput_char = [];
 
-
-<INITIAL>{code-start}[^\n\r\f]*
-  %{
-    yytext = yytext.substring(1).trim();
-    return 'CODE';
-  %}
-<INITIAL>{html-start}[^\n\r\f]*
-  %{
-    yytext = yytext.substring(1).trim();
-    return 'HTML';
-  %}
-<INITIAL>{comment-start}[^\n\r\f]*
-  %{
-    yytext = yytext.substring(2).trim();
-    return 'COMMENT';
-  %}
-<INITIAL>{doctype}{whitespace}+[^\n\r\f]+
-  %{
-    yytext = yytext.substring(7).trim();
-    return 'DOCTYPE';
-  %}
-<INITIAL>{extend}
-  %{
-    this.begin('state-component');
-    return 'EXTEND';
-  %}
-<INITIAL>{replace}{whitespace}+{ident}
-  %{
-    yytext = yytext.substring(7).trim();
-    return 'REPLACE';
-  %}
-<INITIAL>{include}
-  %{
-    this.begin('state-component');
-    return 'INCLUDE';
-  %}
-<INITIAL>{block}{whitespace}+{ident}
-  %{
-    yytext = yytext.substring(5).trim();
-    return 'BLOCK';
-  %}
-
-
-<INITIAL>{ident}
-  %{
-    this.begin('state-tag');
-    return 'TAG';
-  %}
-<state-tag><<EOF>>
-  %{
-    return 'EOF';
-  %}
-<state-tag>{dot-start}{ident}
-  %{
-    yytext = yytext.substring(1);
-    return 'CLASS';
-  %}
-<state-tag>{dot-start}{whitespace}*{newline}
-  %{
-    this.popState();
-    this.begin('state-origin');
-  %}
-<state-tag>{property-start}
-  %{
-    this.begin('state-property');
-    return 'PROPERTY-START';
-  %}
-<state-tag>{whitespace}+[^\n\r\f]*
-  %{
-    this.popState();
-
-    yytext = yytext.trim();
-    if(yytext){
-      return 'HTML';
-    }
-  %}
-<state-tag>
-  %{
-    this.popState();
-  %}
-
-
-<state-origin><<EOF>>
-  %{
-    return 'EOF';
-  %}
-<state-origin>{newline}{whitespace}*{newline}{whitespace}*
-  %{
-    /* ignore blank line */
-  %}
-<state-origin>{newline}{whitespace}*
-  %{
-    if((yyleng-1) <= indent_stack[0]){
-      this.popState();
-
-      while((yyleng-1) < indent_stack[0]){
+      while(indent_stack[0] > 0){
         indent_stack.shift();
-        this.begin('state-outdent');
+        unput_char.push('<<OUTDENT>>');
       }
+
+      this.unput(unput_char.join(''));
+    }else{
+      return 'EOF';
     }
   %}
-<state-origin>{whitespace}+
-  %{
-    /* ignore start blank line */
-  %}
-<state-origin>{whitespace}*{newline}{whitespace}*
-  %{
-    /* ignore start blank line */
-  %}
-<state-origin>[^\n\r\f]*
-  %{
-    return 'ORIGIN';
-  %}
-
-
-<state-component>{whitespace}*{property-start}
-  %{
-    this.begin('state-property');
-    return 'PROPERTY-START';
-  %}
-<state-component>{whitespace}+[^\r\n\f]+
-  %{
-    this.popState();
-    return 'COMPONENT-ID';
-  %}
-
-<state-property>{newline}|{whitespace}
-  %{
-    /* ignore whitespace */
-  %}
-<state-property>{string}
-  %{
-    return 'STRING';
-  %}
-<state-property>{true}
-  %{
-    return 'TRUE';
-  %}
-<state-property>{false}
-  %{
-    return 'FALSE';
-  %}
-<state-property>{null}
-  %{
-    return 'NULL';
-  %}
-<state-property>{number}
-  %{
-    return 'NUMBER';
-  %}
-<state-property>"["|"]"|"{"|"}"|":"|","|"="
-  %{
-    return yytext;
-  %}
-<state-property>{ident}
-  %{
-    return 'IDENT';
-  %}
-<state-property>{property-close}
-  %{
-    this.popState();
-
-    return 'PROPERTY-CLOSE';
-  %}
-
-
-
-<INITIAL><<EOF>> {return 'EOF';}
-
-
-%%

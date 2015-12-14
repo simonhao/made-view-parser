@@ -1,90 +1,45 @@
 doctype html
-html.class.qzone(id="qq") this is html
-  include name
-  script.
+html qzone
+  | dfsd  fsd
+  test.class.qzone.weibo-qq.console.log(name=[qq.weibo], weibo = [qq['_name']['123']], weibo-qq=123) qq
+    | html
+  qzone weibo
+    // weibo this is comment
+    test(
+      name = qq, weibo = qq,
+      name = qq,
+      name = "string",
+      test = {
+        name: 'qq',
+        weibo: [1,"2",qq]
+      }
+    ) html this is qq
+      test hts sdfs sdf s
+    script.
 
+      console.log('test');
+        console.log('qq');
 
-    console.log('r');
-    console.log('qq');
-  //HTMLsdfsdfsd
-  head this is head
-    | qq weibo html<wqer></fsd>
-    title
+      console.log('123');
+    qzone hfsdf
+qzone
+  head
+  - console.log('test');
   body
-    script.
-      console.log('test')
-      console.error('test')
-
-      console.log('qq')
-    script.
-      console.log('weibo')
-  footer
-body
-- console.log('test')
-- alert("wq");
-html
-  head
-    body
-      - code
-      title
-    - code
-title
-
-html
-
-
-  head
-    - code
-    head
-    title
-    - console.log('test')
-    body
-      console.log('test')
-body
-    div name
-      span my
-      | qq
-      span #{qq}
-extend(
-  replace="qq"
-  keyword=["name","qq","web"]
-  description="this is #{description}"
-  title=title
-  say=true
-  not=false
-  hello=nullm
-  name={
-    first: 'simon',
-    last: 'hao'
-  }
-  age=24
-) layout!content
-replace header
-  include header
-    include main
-      include footer
-  include nav
-replace main
-  - console.log('test')
-  if two
-    include nav:top
-    p this is main before
-      span qq
-      | wiebo
-      span #{description}
-  else
-    include nav:bottom
-    p this is main after
-replace footer
-  each val,index in keyword
-    p this is footer #{keyword}
-  while n < 4
-    p(
-      id="test"
-      qq="123"
-    ) footer list
-  script.
-    function show(name){
-      alert(name);
-    }
-    show('simon');
+    div
+      comm-admin-menu(name=qq, weibo = qq, weibo-qq=123) weibo
+        weibo
+          qzone weibo
+      comm-admin-navbar
+      comm-admin-list(
+        name = qq, weibo = qq,
+        name = qq,
+        name = "string",
+        test = {
+          name: 'qq',
+          weibo: [1,"2",qq]
+        }
+      )
+      comm-admin-navbar
+    div
+      qzone
