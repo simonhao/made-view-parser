@@ -62,6 +62,101 @@ Qualified-Rule
   | Case -> $1
   | When -> $1
   | Default -> $1
+  | Block -> $1
+  | Include -> $1
+  | Extends -> $1
+  ;
+
+Extends
+  : EXTEND TAG-TEXT Content-List
+    %{
+      $$ = {
+        type: 'extends',
+        id: $2,
+        content: $3
+      };
+    %}
+  | EXTEND Property-List TAG-TEXT Content-List
+    %{
+      $$ = {
+        type: 'extends',
+        option: $2,
+        id: $3,
+        content: $4
+      };
+    %}
+  ;
+
+Content-List
+  : Content -> [$1]
+  | Content-List Content
+    %{
+      $$ = $1;
+      $$.push($2);
+    %}
+  ;
+
+Content
+  : Content-Type INDENT Rule-List OUTDENT
+    %{
+      $$ = {
+        type: $1.type,
+        block: $1.block,
+        nodes: $3
+      };
+    %}
+  ;
+
+Content-Type
+  : REPLACE
+    %{
+      $$ = {
+        type: 'replace',
+        block: $1
+      };
+    %}
+  | BEFORE
+    %{
+      $$ = {
+        type: 'before',
+        block: $1
+      };
+    %}
+  | AFTER
+    %{
+      $$ = {
+        type: 'after',
+        block: $1
+      };
+    %}
+  ;
+
+Include
+  : INCLUDE TAG-TEXT
+    %{
+      $$ = {
+        type: 'include',
+        id: $2
+      };
+    %}
+  | INCLUDE Property-List TAG-TEXT
+    %{
+      $$ = {
+        type: 'include',
+        option: $2,
+        id: $3
+      };
+    %}
+  ;
+
+Block
+  : BLOCK
+    %{
+      $$ = {
+        type: 'block',
+        name: $1
+      };
+    %}
   ;
 
 Case

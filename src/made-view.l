@@ -32,9 +32,11 @@ false       "false"
 null        "null"
 number      [+-]?([0-9]+|[0-9]*\.[0-9]+)("e"[+-]?[0-9]+)?
 
-extend      "extend"
+extend      "extends"
 include     "include"
 replace     "replace"
+before      "before"
+after       "after"
 block       "block"
 doctype     "doctype"
 comment     "//"
@@ -50,6 +52,34 @@ default     "default"
 in          "in"
 %%
 
+<INITIAL>{extend}
+  %{
+    return 'EXTEND';
+  %}
+<INITIAL>{include}
+  %{
+    return 'INCLUDE';
+  %}
+<INITIAL>{replace}{whitespace}+[^\r\n\f]*
+  %{
+    yytext = yytext.substring(7).trim();
+    return 'REPLACE';
+  %}
+<INITIAL>{before}{whitespace}+[^\r\n\f]*
+  %{
+    yytext = yytext.substring(6).trim();
+    return 'BEFORE';
+  %}
+<INITIAL>{after}{whitespace}+[^\r\n\f]*
+  %{
+    yytext = yytext.substring(5).trim();
+    return 'AFTER';
+  %}
+<INITIAL>{block}{whitespace}+[^\r\n\f]*
+  %{
+    yytext = yytext.substring(5).trim();
+    return 'BLOCK'
+  %}
 <INITIAL>{case}{whitespace}+[^\r\n\f]*
   %{
     yytext = yytext.substring(4).trim();
