@@ -44,9 +44,27 @@ else        "else"
 elseif      "else if"
 while       "while"
 each        "each"
+case        "case"
+when        "when"
+default     "default"
 in          "in"
 %%
 
+<INITIAL>{case}{whitespace}+[^\r\n\f]*
+  %{
+    yytext = yytext.substring(4).trim();
+    return 'CASE';
+  %}
+<INITIAL>{when}{whitespace}+[^\r\n\f]*
+  %{
+    yytext = yytext.substring(4).trim();
+    return 'WHEN';
+  %}
+<INITIAL>{default}{whitespace}*{newline}
+  %{
+    this.unput('\n');
+    return 'DEFAULT';
+  %}
 <INITIAL>{each}{whitespace}+
   %{
     this.begin('STATE-EACH');
@@ -127,7 +145,7 @@ in          "in"
     yytext = yytext.substring(1).trim();
     return 'EACH-INDEX';
   %}
-<STATE-EACH>"in"{whitespace}+[^\r\n\f]*
+<STATE-EACH>{in}{whitespace}+[^\r\n\f]*
   %{
     this.popState();
 

@@ -59,6 +59,38 @@ Qualified-Rule
   | ElseIf -> $1
   | While -> $1
   | Each -> $1
+  | Case -> $1
+  | When -> $1
+  | Default -> $1
+  ;
+
+Case
+  : CASE
+    %{
+      $$ = {
+        type: 'case',
+        expr: $1
+      };
+    %}
+  ;
+
+When
+  : WHEN
+    %{
+      $$ = {
+        type: 'when',
+        expr: $1
+      };
+    %}
+  ;
+
+Default
+  : DEFAULT
+    %{
+      $$ = {
+        type: 'default'
+      };
+    %}
   ;
 
 Each
