@@ -1,6 +1,6 @@
 {
   "name": "made-view-parser",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "made view parser",
   "main": "./lib/parser.js",
   "directories": {
