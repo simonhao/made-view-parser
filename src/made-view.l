@@ -286,6 +286,23 @@ in          "in"
       }
     }
   %}
+<STATE-ORIGIN><<EOF>>
+  %{
+    this.popState();
+
+    if(indent_stack[0] > 0){
+      var unput_char = [];
+
+      while(indent_stack[0] > 0){
+        indent_stack.shift();
+        unput_char.push('<<OUTDENT>>');
+      }
+
+      this.unput(unput_char.join(''));
+    }else{
+      return 'EOF';
+    }
+  %}
 <STATE-ORIGIN>[^\r\n\f]*
   %{
     return 'ORIGIN';
