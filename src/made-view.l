@@ -17,6 +17,7 @@ open-paren  "("
 close-paren ")"
 dot         "."
 hyphen      "-"
+colon       ":"
 space       " "
 tab         \t
 column      "|"
@@ -111,7 +112,7 @@ in          "in"
     yytext = yytext.substring(7).trim();
     return 'ELSEIF';
   %}
-<INITIAL>{else}{whitespace}+[^\r\n\f]*
+<INITIAL>{else}{whitespace}*[^\r\n\f]*
   %{
     yytext = yytext.substring(4).trim();
     return 'ELSE';
@@ -138,6 +139,10 @@ in          "in"
   %{
     return '-';
   %}
+<INITIAL>{colon}
+  %{
+    return ':';
+  %}
 <INITIAL>{dot}{name}
   %{
     yytext = yytext.substring(1);
@@ -147,6 +152,7 @@ in          "in"
   %{
     this.begin('STATE-ORIGIN');
     this.unput('\n');
+    return 'INDENT';
   %}
 <INITIAL>{open-paren}
   %{
@@ -281,9 +287,8 @@ in          "in"
         unput_char.push('<<OUTDENT>>');
       }
 
-      if(unput_char.length){
-        this.unput(unput_char.join(''));
-      }
+      unput_char.push('<<OUTDENT>>');
+      this.unput(unput_char.join(''));
     }
   %}
 <STATE-ORIGIN><<EOF>>
@@ -297,7 +302,7 @@ in          "in"
         indent_stack.shift();
         unput_char.push('<<OUTDENT>>');
       }
-
+      unput_char.push('<<OUTDENT>>');
       this.unput(unput_char.join(''));
     }else{
       return 'EOF';

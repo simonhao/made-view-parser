@@ -383,7 +383,7 @@ Property
       $$ = {
         type: 'property',
         name: $1,
-        val: true
+        boolean: true
       };
     %}
   | Property-Name "=" JSON-Value
@@ -418,21 +418,21 @@ JSON-Reference
   : '.' IDENT
     %{
       $$ = {
-        type: 'json-literal',
+        type: 'json_literal',
         val: $1+$2
       };
     %}
   | "[" STRING "]"
     %{
       $$ = {
-        type: 'json-literal',
+        type: 'json_literal',
         val: $1+'"'+$2+'"'+$3
       };
     %}
   | "[" NUMBER "]"
     %{
       $$ = {
-        type: 'json-literal',
+        type: 'json_literal',
         val: $1+$2+$3
       };
     %}
@@ -442,7 +442,7 @@ JSON-Reference-List
   : JSON-Reference-Value JSON-Reference
     %{
       $$ = {
-        type: 'json-reference-list',
+        type: 'json_reference_list',
         ident: $1,
         list: [$2]
       };
@@ -458,7 +458,7 @@ JSON-Number
   : NUMBER
     %{
       $$ = {
-        type: 'json-number',
+        type: 'json_number',
         val: $1
       };
     %}
@@ -467,7 +467,7 @@ JSON-String
   : STRING
     %{
       $$ = {
-        type: 'json-string',
+        type: 'json_string',
         val: $1
       };
     %}
@@ -476,7 +476,7 @@ JSON-Literal
   : JSON-Literal-Element
     %{
       $$ = {
-        type: 'json-literal',
+        type: 'json_literal',
         val: $1
       };
     %}
@@ -492,7 +492,7 @@ JSON-Ident
   : IDENT
     %{
       $$ = {
-        type: 'json-ident',
+        type: 'json_ident',
         val: $1
       };
     %}
@@ -501,7 +501,7 @@ JSON-Object
   : "{" JSON-Member-List "}"
     %{
       $$ = {
-        type: 'json-object',
+        type: 'json_object',
         member: $2
       };
     %}
@@ -518,7 +518,7 @@ JSON-Member
   : IDENT ":" JSON-Value
     %{
       $$ = {
-        type: 'json-member',
+        type: 'json_member',
         name: $1,
         val: $3
       };
@@ -528,7 +528,7 @@ JSON-Array
   : "[" JSON-Element-List "]"
     %{
       $$ = {
-        type: 'json-array',
+        type: 'json_array',
         element: $2
       };
     %}
@@ -546,14 +546,14 @@ Custom-Tag
   : Custom-Tag-Name
     %{
       $$ = {
-        type: 'custom-tag',
+        type: 'custom_tag',
         name: $1
       };
     %}
   | Custom-Tag-Name TAG-TEXT
     %{
       $$ = {
-        type: 'custom-tag',
+        type: 'custom_tag',
         name: $1,
         text: $2
       };
@@ -561,7 +561,7 @@ Custom-Tag
   | Custom-Tag-Name Property-List
     %{
       $$ = {
-        type: 'custom-tag',
+        type: 'custom_tag',
         name: $1,
         option: $2
       };
@@ -569,7 +569,7 @@ Custom-Tag
   | Custom-Tag-Name Property-List TAG-TEXT
     %{
       $$ = {
-        type: 'custom-tag',
+        type: 'custom_tag',
         name: $1,
         option: $2,
         text: $3
@@ -577,10 +577,15 @@ Custom-Tag
     %}
   ;
 Custom-Tag-Name
-  : Tag-Name "-" Tag-Name -> $1+$2+$3
-  | Custom-Tag-Name "-" Tag-Name -> $1+$2+$3
+  : Tag-Name ":" Tag-Name -> $1+':'+$3
+  | Custom-Tag-Name-List -> $1
+  | Custom-Tag-Name-List ":" Tag-Name -> $1+':'+$3
   ;
 
+Custom-Tag-Name-List
+  : Tag-Name "-" Tag-Name -> $1+'/'+$3
+  | Custom-Tag-Name-List "-" Tag-Name -> $1+'/'+$3
+  ;
 
 Code
   : CODE

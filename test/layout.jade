@@ -6,6 +6,10 @@ html
     meta(name="description", content="#{description}")
     title #{title}
   body
+    header:top
+    comm-header
+    comm-navbar:top
+    comm-navbar:bottom
     header.header(id="header")
       block header
     main.main(id="main")
@@ -14,6 +18,8 @@ html
     footer.footer(id="footer")
       block main
     script.
+
+      conosle.log('qzone');
       console.log('this is code test');
     each value in name
     extends index name
