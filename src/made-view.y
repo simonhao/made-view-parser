@@ -304,7 +304,7 @@ Tag
         type: 'tag',
         name: $1,
         class_list: $2,
-        test: $3
+        text: $3
       };
     %}
   | Tag-Name Property-List

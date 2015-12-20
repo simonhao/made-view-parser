@@ -1,6 +1,6 @@
 {
   "name": "made-view-parser",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "made view parser",
   "main": "index.js",
   "directories": {
@@ -24,5 +24,7 @@
   "bugs": {
     "url": "https://github.com/simonhao/made-view-parser/issues"
   },
-  "homepage": "https://github.com/simonhao/made-view-parser#readme"
+  "homepage": "https://github.com/simonhao/made-view-parser#readme",
+  "dependencies": {
+  }
 }
